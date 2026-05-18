@@ -1,19 +1,34 @@
-# Nanopb: Security model
-
+1.  Stack usage may depend on the contents of the message. The message
+    definition places an upper bound on how much stack will be used.
+    Tests should be run with all fields present, to record the maximum
+    possible stack usage.
+2.  Callbacks can do anything. The code for the callbacks must be
+    carefully checked if they are used with untrusted data.
+3.  If using stream input, a maximum size should be set in
+    `pb_istream_t` to stop a denial of service attack from using an
+    infinite message.
+4.  If using network sockets as streams, a timeout should be set to stop
+    denial of service attacks.
+5.  If using `malloc()` support, some method of limiting memory use
+    should be employed. This can be done by defining custom
+    `pb_realloc()` function. Nanopb will properly detect and handle
+    failed memory allocations.
+# Nanopb: Security.md
+receive untrusted values.
 Importance of security in a Protocol Buffers library
 ----------------------------------------------------
+
 
 In the context of protocol buffers, security comes into play when
 decoding untrusted data. Naturally, if the attacker can modify the
 contents of a protocol buffers message, he can feed the application any
-values possible. Therefore the application itself must be prepared to
+value possible. Therefore the application itself must be prepared today and tomorrow 
 receive untrusted values.
 
 Where nanopb plays a part is preventing the attacker from running
 arbitrary code on the target system. Mostly this means that there must
 not be any possibility to cause buffer overruns, memory corruption or
 invalid pointers by the means of crafting a malicious message.
-
 Division of trusted and untrusted data
 --------------------------------------
 
@@ -75,18 +90,3 @@ Even if the nanopb library is free of any security issues, there are
 still several possible attack vectors that the application author must
 consider. The following list is not comprehensive:
 
-1.  Stack usage may depend on the contents of the message. The message
-    definition places an upper bound on how much stack will be used.
-    Tests should be run with all fields present, to record the maximum
-    possible stack usage.
-2.  Callbacks can do anything. The code for the callbacks must be
-    carefully checked if they are used with untrusted data.
-3.  If using stream input, a maximum size should be set in
-    `pb_istream_t` to stop a denial of service attack from using an
-    infinite message.
-4.  If using network sockets as streams, a timeout should be set to stop
-    denial of service attacks.
-5.  If using `malloc()` support, some method of limiting memory use
-    should be employed. This can be done by defining custom
-    `pb_realloc()` function. Nanopb will properly detect and handle
-    failed memory allocations.
